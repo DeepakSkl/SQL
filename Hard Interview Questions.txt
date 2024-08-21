@@ -1,0 +1,208 @@
+
+
+Questions
+1.         Create a parameter called 'Dim' which displays Country, Sport & Athlete.
+2.         Create a horizontal stacked bar chart with Dim as the dimension (row) and sum of gold medals, silver medals and bronze medals as the measures. Stack by Bronze, Silver & Gold. Sort highest to lowest. Add value of Total Medals to the stacked chart.
+3.         Create a trend chart, with Year on the x-axis, sum of silver medals on the y-axis and sum of bronze medals on the y axis as a dual axis. Change the marker on the dual axis to a bar. Display color legend.
+4.         Create a scatter plot with sum of gold medals on the x-axis, sum of silver medals on the y-axis and color code by country. The size of the bubble should be the totals no. of medals.
+5.         Create a calculated field called Age bucket.
+a.         Age<20 -Less than 20
+b.         Age>20 and Age<30 - Less than 30
+c.         Age>30 and Age<40 - Less than 40
+d.         Age>40 - Greater than 40
+6.         Create a horizontal bar chart with sum of total medals on the x-axis and age bucket on the y-axis.
+7.         Create a calculated field called Calc which flags the athletes, who have won medals across multiple years, as 'Yes'. 
+8.         Create a table with columns, Athlete, Calc, Year, Age, Gold Medals, Silver Medals, Gold Medals.
+9.         Create a dashboard and add all the charts created above.
+10.       Add global filters for Year, Dim, Country, Sport and Athlete to the dashboard. Country, Sport and Athlete should be cascading filters.
+11.       Create an action on the dashboard to filter all charts when dim, year or the bubbles on the scatter plot are selected.  
+12.       Create an action to drill down to the table above #8 from the age bucket horizontal bar chart.
+
+
+1) Write a SQL query to get the third highest salary from the Employee table
+
++----+--------+
+| Id | Salary | 
++----+--------+
+| 1 | 100 |
+| 2 | 200 |
+| 3 | 400 |
+| 4 | 400 | 
++----+--------+
+
+With CTE as(
+Select id, salary
+rank_dense()over (order by Salary DESC) RN
+)
+select Id from CTE where RN=3
+
+
+2) Write an SQL query to find all numbers that appear at least three times consecutively.
+
++-------------+---------+
+| Column Name | Type    |
++-------------+---------+
+| id          | int     |
+| num         | varchar |
++-------------+---------+
+id is the primary key for this table.
+id is an autoincrement column.
+
+Logs table:
++----+-----+
+| id | num |
++----+-----+
+| 1  | 1   |
+| 2  | 1   |
+| 3  | 1   |
+| 4  | 2   |       
+| 5  | 1   |       
+| 6  | 2   |
+| 7  | 2   |
++----+-----+
+
+select Id,Num,
+row_number()over(partition by num
+
+
+3) Given the Employee table, write a SQL query to find the employees who earn more than their managers.
+
++----+-------+--------+-----------+ 
+| Id | Name | Salary | ManagerId |
++----+-------+--------+-----------+
+| 1 | Joe | 70000 | 3 |
+| 2 | Henry | 80000 | 4 |
+| 3 | Sam | 60000 | NULL |
+| 4 | Max | 90000 | NULL |
++----+--- ----+--------+-----------
+
+select Name ,salary from Employee E left join Employee M 
+on E.ManagerID=M.ID
+where E.Salary>M.Salary
+
+
+4) Write an SQL query to find all dates' Id with higher temperatures compared to its previous dates (yesterday).
+
++-----------+---------+
+| Column Name   | Type    |
++---------------+---------+
+| id            | int     |
+| recordDate    | date    |
+| temperature   | int     |
++---------------+---------+
+id is the primary key for this table.
+This table contains information about the temperature on a certain day.
+Weather table:
++----+------------+-------------+
+| id | recordDate | temperature |
++----+------------+-------------+
+| 1  | 2015-01-01 | 10          |
+| 2  | 2015-01-02 | 25          |
+| 3  | 2015-01-03 | 20          |
+| 4  | 2015-01-04 | 30          |
++----+------------+-------------+
+
+Answer- 
+WITH TempComparison AS (
+    SELECT 
+        id,
+        recordDate,
+        temperature,
+        LAG(temperature) OVER (ORDER BY recordDate) AS previousTemp
+    FROM Weather
+)
+SELECT 
+    id,
+    recordDate,
+    temperature
+FROM 
+    TempComparison
+WHERE 
+    temperature > previousTemp;
+
+
+
+5) Write an SQL query to rank the scores. The ranking should be calculated according to the following rules:
+
+The scores should be ranked from the highest to the lowest.-- score desc
+If there is a tie between two scores, both should have the same ranking.--rank_dense
+After a tie, the next ranking number should be the next consecutive integer value. In other words, there should be no holes between ranks.-- rank dense
+Return the result table ordered by score in descending order.
+
++-------------+---------+
+| Column Name | Type    |
++-------------+---------+
+| id          | int     |
+| score       | decimal |
++-------------+---------+
+id is the primary key for this table.
+Each row of this table contains the score of a game. Score is a floating point value with two decimal places.
+
+Answer-
+SELECT 
+    id, 
+    score, 
+    DENSE_RANK() OVER (ORDER BY score DESC) AS ranking
+FROM 
+    Result
+ORDER BY 
+    score DESC;
+
+
+
+
+6) Write an SQL query to find the customer_number for the customer who has placed the largest number of orders
+
+Orders table:
++--------------+-----------------+
+| order_number | customer_number |
++--------------+-----------------+
+| 1            | 1               |
+| 2            | 2               |
+| 3            | 3               |
+| 4            | 3               |
++--------------+-----------------+
+
+answer-
+Select Customer_number, Order_number from Order
+where Order_number=(select max(order_number) from Orders)
+
+
+7)  Write an SQL query to find all the authors that viewed at least one of their own articles.
+
++---------------+---------+
+| Column Name   | Type    |
++---------------+---------+
+| article_id    | int     |
+| author_id     | int     |
+| viewer_id     | int     |
+| view_date     | date    |
++---------------+---------+
+There is no primary key for this table, it may have duplicate rows.
+Each row of this table indicates that some viewer viewed an article (written by some author) on some date. 
+Note that equal author_id and viewer_id indicate the same person.
+
+Views table:
++------------+-----------+-----------+------------+
+| article_id | author_id | viewer_id | view_date  |
++------------+-----------+-----------+------------+
+| 1          | 3         | 5         | 2019-08-01 |
+| 1          | 3         | 6         | 2019-08-02 |
+| 2          | 7         | 7         | 2019-08-01 |
+| 2          | 7         | 6         | 2019-08-02 |
+| 4          | 7         | 1         | 2019-07-22 |
+| 3          | 4         | 4         | 2019-07-21 |
+| 3          | 4         | 4         | 2019-07-21 |
++------------+-----------+-----------+------------+
+
+answer-
+
+SELECT DISTINCT author_id
+FROM Views
+WHERE author_id = viewer_id;
+
+
+
+
+
+
